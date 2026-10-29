@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a subnet inside an existing VPC
+
+Parameters:
+  VpcId:
+    Description: Select the VPC created by 01-vpc.yaml
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: Training-Subnet
+
+Outputs:
+  SubnetId:
+    Description: ID of the created subnet
+    Value: !Ref MySubnet

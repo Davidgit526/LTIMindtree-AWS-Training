@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create an EC2 instance in an existing subnet
+
+Parameters:
+  VpcId:
+    Description: Select the VPC that contains the subnet
+    Type: AWS::EC2::VPC::Id
+  SubnetId:
+    Description: Select the subnet created by 02-subnet.yaml
+    Type: AWS::EC2::Subnet::Id
+  AmiId:
+    Description: Linux AMI ID available in the selected AWS Region
+    Type: AWS::EC2::Image::Id
+  KeyName:
+    Description: Name of an existing EC2 key pair
+    Type: AWS::EC2::KeyPair::KeyName
+  SSHLocation:
+    Description: Your public IPv4 address followed by /32 (example format 203.0.113.10/32; replace with your real IP)
+    Type: String
+    AllowedPattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/32$'
+    ConstraintDescription: Enter an IPv4 CIDR in /32 format, such as your-public-ip/32.
+
+Resources:
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH only from the trusted IP provided
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+      Tags:
+        - Key: Name
+          Value: Training-SG
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t2.micro
+      KeyName: !Ref KeyName
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+      Tags:
+        - Key: Name
+          Value: Training-EC2
+
+Outputs:
+  InstanceId:
+    Description: Created EC2 instance ID
+    Value: !Ref MyEC2Instance
+  PublicIP:
+    Description: Public IPv4 address, if assigned
+    Value: !GetAtt MyEC2Instance.PublicIp

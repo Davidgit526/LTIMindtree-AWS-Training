@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Configure internet routing for an existing public subnet
+
+Parameters:
+  VpcId:
+    Description: Select the VPC containing the subnet
+    Type: AWS::EC2::VPC::Id
+  SubnetId:
+    Description: Select the subnet created by 02-subnet.yaml
+    Type: AWS::EC2::Subnet::Id
+  InternetGatewayId:
+    Description: ID of the attached Internet Gateway from 03-internet-gateway.yaml
+    Type: String
+
+Resources:
+  MyRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: Training-RouteTable
+
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: MyRouteTable
+    Properties:
+      RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGatewayId
+
+  SubnetAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetId
+      RouteTableId: !Ref MyRouteTable
+
+Outputs:
+  RouteTableId:
+    Description: ID of the created route table
+    Value: !Ref MyRouteTable

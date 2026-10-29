@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create and attach an Internet Gateway to an existing VPC
+
+Parameters:
+  VpcId:
+    Description: Select the VPC created by 01-vpc.yaml
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Training-IGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VpcId
+      InternetGatewayId: !Ref MyInternetGateway
+
+Outputs:
+  InternetGatewayId:
+    Description: ID of the created Internet Gateway
+    Value: !Ref MyInternetGateway
